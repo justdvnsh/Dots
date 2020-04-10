@@ -1,36 +1,25 @@
-const db = require("./db");
-const passport = require("passport");
-const LocalStrategy = require("passport-local").Strategy;
-const User = require("./models/User");
+require("dotenv").config();
+const express = require("express");
+const app = express();
+const cors = require("cors");
 const bodyParser = require("body-parser");
-const app = require("express")();
+const errorHandler = require("./handlers/error");
+const authRoutes = require("./routes/auth");
+const PORT = 3000;
 
-app.use(passport.initialize());
-app.use(passport.session());
+app.use(cors());
 app.use(bodyParser.json());
 
-// passport.serializeUser(User.serializeUser());
-// passport.deserializeUser(User.deserializeUser());
-// passport.use(new LocalStrategy(User.authenticate()));
+app.use("/api/auth", authRoutes);
 
-app.post("/register", (request, response) => {
-
-    // console.log(request.body);
-    // creating user
-    let user = new User({
-        email: request.body.email,
-        branch: request.body.branch,
-        semester: request.body.semester,
-        password: request.body.password
-    });
-
-    new User(user).save((err, result) => {
-        if (err) console.log(err)
-        if (result) response.json(result);
-    })
-
+app.use(function(req, res, next) {
+  let err = new Error("Not Found");
+  err.status = 404;
+  next(err);
 });
 
-app.listen(3000, () => {
-    console.log("Server Started")
-})
+app.use(errorHandler);
+
+app.listen(PORT, function() {
+  console.log(`Server is starting on port ${PORT}`);
+});
